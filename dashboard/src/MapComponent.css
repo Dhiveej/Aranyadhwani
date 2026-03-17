@@ -1,0 +1,51 @@
+.map-leaflet-circle-container {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #142500;
+  position: relative;
+  box-shadow: 0 0 30px 10px #ba0101a0, 0 0 130px #382d36d4;
+  border: 3px solid #3b4873;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure the Leaflet map fits inside the circle */
+.map-leaflet-circle-container .leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+}
+
+.custom-pulsing-icon .pulsing-dot {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(255, 107, 107, 0.85);
+  box-shadow: 0 0 10px rgba(255, 107, 107, 1);
+  animation: pulse-animation 2s infinite;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+}
+.custom-pulsing-icon .inner-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background-color: #fff;
+  z-index: 2;
+}
+@keyframes pulse-animation {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);}
+  70% { transform: scale(2); box-shadow: 0 0 10px 20px rgba(255, 107, 107, 0);}
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);}
+}
+

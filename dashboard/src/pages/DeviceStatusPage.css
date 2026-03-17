@@ -1,0 +1,104 @@
+.device-status-page {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    color: #e6edf3;
+    margin: 0;
+}
+
+.page-header p {
+    color: #8b949e;
+    margin-top: 0.5rem;
+}
+
+.device-list-container {
+    background-color: #161b22;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    overflow: hidden;
+}
+
+.device-list-header, .device-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 2fr;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+}
+
+.device-list-header {
+    background-color: #0d1117;
+    color: #8b949e;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-bottom: 1px solid #30363d;
+}
+
+.device-row {
+    border-bottom: 1px solid #30363d;
+    transition: background-color 0.2s ease;
+}
+
+.device-row:last-child {
+    border-bottom: none;
+}
+
+.device-row:hover {
+    background-color: #21262d;
+}
+
+.status-badge {
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status-badge.online {
+    background-color: rgba(46, 160, 67, 0.2);
+    color: #3fb950;
+}
+
+.status-badge.offline {
+    background-color: rgba(248, 81, 73, 0.2);
+    color: #f85149;
+}
+
+.battery-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-bar-container {
+    width: 100px;
+    height: 8px;
+    background-color: #0d1117;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #3fb950, #a3bf3f);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.device-row:nth-child(2) .progress-bar { /* Just for demo look */
+    background: linear-gradient(90deg, #f85149, #e3b341);
+}
