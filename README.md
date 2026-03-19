@@ -9,9 +9,9 @@
   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝
 </pre>
 ```
-<img src="Landing.jpg" width="800" alt="Aranyadhwani Landing Page"/>
+<img src="demo.gif" width="800" alt="Aranyadhwani Live Demo"/>
 
-*Landing Page with an Overview*
+*Landing Page Demo*
 
 
 ### *आरण्यध्वनि — Voice of the Forest*
