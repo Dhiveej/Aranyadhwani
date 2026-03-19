@@ -41,7 +41,7 @@
 <br/>
 
 <!-- Replace with actual dashboard screenshot -->
-<img src="dashboard_screenshot.png" width="800" alt="Aranyadhwani Live Dashboard — showing threat feed, tactical map, and node network"/>
+<img src="Operations.png" width="800" alt="Aranyadhwani Live Dashboard — showing threat feed, tactical map, and node network"/>
 
 *Live dashboard showing real-time detections from aranya_pi_01 at Nagarhole Tiger Reserve*
 
