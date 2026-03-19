@@ -1,3 +1,5 @@
-google-cloud-storage
-requests
+numpy
+scipy
+PyAudio
 firebase-admin
+ai-edge-litert
