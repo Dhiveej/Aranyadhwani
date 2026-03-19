@@ -442,9 +442,8 @@ Aranyadhwani/
 | B Madan | Systems Integration & Testing |
 | Bhumika Bindagi | Research & Documentation |
 
-Department of Electrical & Electronics Engineering  
-Dayananda Sagar College of Engineering, Bengaluru  
-IEEE PES, PELS and IAS DSCE Student Branch Chapters
+Department of Computer Science and Engineering 
+RNS Institute of Technology, Bengaluru  
 
 ---
 
