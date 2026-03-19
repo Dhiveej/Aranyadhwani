@@ -33,21 +33,7 @@
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=14&duration=3000&pause=1000&color=2C5F2D&center=true&vCenter=true&width=600&lines=Listening+to+the+forest%2C+so+rangers+don't+have+to.;521+sound+classes.+%2415+hardware.+Real-time+alerts.;Edge+AI+%2B+DSP+%2B+Firebase+%2B+Twilio.+All+on+a+Pi+Zero." alt="Typing SVG" />
 
-# 🌲 ARANYADHWANI
-### *Voice of the Forest*
 
-**Edge-AI Acoustic Guardian for Real-Time Forest Threat Detection**
-
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![TFLite](https://img.shields.io/badge/TensorFlow_Lite-YAMNet-FF6F00?style=flat-square&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/lite)
-[![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
-[![scipy](https://img.shields.io/badge/DSP-scipy_sosfilt-8CAAE6?style=flat-square&logo=scipy&logoColor=white)](https://scipy.org)
-[![Twilio](https://img.shields.io/badge/Alerts-Twilio_SMS-F22F46?style=flat-square&logo=twilio&logoColor=white)](https://twilio.com)
-[![RAM](https://img.shields.io/badge/RAM_Usage-<200MB-2C5F2D?style=flat-square&logo=raspberrypi&logoColor=white)]()
-[![Hardware Cost](https://img.shields.io/badge/BOM_Cost-%2445-gold?style=flat-square)]()
-[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
-
-<br/>
 
 > *"By the time a satellite sees deforestation, the trees are already gone and the poachers have left.  
 > Aranyadhwani hears it while it's happening."*
