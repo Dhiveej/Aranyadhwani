@@ -1,0 +1,8 @@
+firebase-functions==0.2.0
+firebase-admin==6.5.0
+google-cloud-aiplatform==1.47.0
+google-cloud-storage==2.16.0
+tensorflow==2.15.0
+tensorflow_hub==0.16.1
+librosa==0.10.1
+soundfile==0.12.1

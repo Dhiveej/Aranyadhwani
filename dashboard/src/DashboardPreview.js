@@ -188,8 +188,13 @@ const ChartTooltip = ({ active, payload, label }) => {
 const DashboardPreview = () => {
   const [tab, setTab] = useState(0);
   const [time, setTime] = useState(new Date());
-  const [flashAlert, setFlashAlert] = useState(true);
   
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // LIVE FIREBASE STATE
   const [detections, setDetections] = useState([]);
   const [nodes, setNodes] = useState([]);
@@ -241,7 +246,9 @@ const DashboardPreview = () => {
             lastDetection: 'N/A',
             totalDetections: 0,
             signal: 4,
-            lat: 12.0433, lng: 76.1398, sector: 'Sector A'
+            lat: n.lat || 12.0433 + (Math.random() * 0.01), // Default to Sector A
+            lng: n.lng || 76.1398 + (Math.random() * 0.01),
+            sector: n.sector || 'Sector A'
           };
         }),
         // Padding with some fake nodes so the map looks cool
@@ -260,41 +267,51 @@ const DashboardPreview = () => {
     { label: 'ABOUT / SYSTEM', icon: Info },
   ], []);
 
+  // Compute live alert state for global UI styling
+  const recentDetections = detections.filter(d => d.timeAgo === 'Just now' || parseInt(d.timeAgo) < 5);
+  const isAlertState = recentDetections.length > 0;
+  const themeColor = isAlertState ? '#ff2020' : '#00ff41';
+  const alertingNodes = new Set(recentDetections.map(d => d.node));
+
   return (
     <div style={S.root}>
       <style>{GLOBAL_CSS}</style>
       <ParticleField />
       {/* Scanline overlay */}
       <div style={S.scanlines} />
-      {/* Red flash on load */}
-      {flashAlert && <div style={S.redFlash} />}
+      {/* Dynamic Red Flash */}
+      {isAlertState && <div style={{ ...S.redFlash, animation: 'criticalPulse 2s infinite' }} />}
 
       {/* ═══ HEADER ═══ */}
-      <header style={S.header}>
+      <header style={{ ...S.header, borderBottom: `1px solid ${isAlertState ? '#4a0a0a' : '#0d2016'}` }}>
         <div style={S.hdrLeft}>
-          <TreePine size={28} color="#00ff41" style={{ filter: 'drop-shadow(0 0 8px rgba(0,255,65,0.5))' }} />
+          <TreePine size={28} color={themeColor} style={{ filter: `drop-shadow(0 0 8px ${themeColor}88)` }} />
           <div>
-            <div style={S.logoText}>ARANYADHWANI</div>
+            <div style={{ ...S.logoText, color: themeColor, textShadow: `0 0 12px ${themeColor}88` }}>ARANYADHWANI</div>
             <div style={S.logoSub}>FOREST ACOUSTIC SURVEILLANCE SYSTEM</div>
           </div>
         </div>
         <div style={S.hdrCenter}>
-          <div style={S.clock}>{time.toLocaleTimeString('en-IN', { hour12: false })}</div>
+          <div style={{ ...S.clock, color: themeColor, textShadow: `0 0 8px ${themeColor}88` }}>{time.toLocaleTimeString('en-IN', { hour12: false })}</div>
           <div style={S.locTag}><MapPin size={12} /> NAGARHOLE TIGER RESERVE</div>
         </div>
         <div style={S.hdrRight}>
-          <div style={S.sysStatus}><span style={S.greenPulse} /> SYSTEM ACTIVE</div>
+          <div style={{ ...S.sysStatus, color: themeColor }}>
+            <span style={{ ...S.greenPulse, background: themeColor, animation: isAlertState ? 'criticalPulse 1s ease-in-out infinite' : 'livePulse 1.5s ease-in-out infinite' }} /> 
+            {isAlertState ? 'ACTIVE THREAT DETECTED' : 'SYSTEM ACTIVE'}
+          </div>
           <div style={S.weatherTag}><TreePine size={11}/> Forest · <Thermometer size={11}/> 24°C · <Wind size={11}/> 12 km/h</div>
         </div>
       </header>
 
       {/* ═══ TAB BAR ═══ */}
-      <nav style={S.tabBar}>
+      <nav style={{ ...S.tabBar, borderBottom: `1px solid ${isAlertState ? '#4a0a0a' : '#0d2016'}` }}>
         {tabs.map((t, i) => {
           const Icon = t.icon;
+          const isActive = tab === i;
           return (
           <button key={i} onClick={() => setTab(i)}
-            style={{ ...S.tabBtn, ...(tab === i ? S.tabActive : {}) }}>
+            style={{ ...S.tabBtn, color: isActive ? themeColor : '#5a9a6e', borderBottomColor: isActive ? themeColor : 'transparent', textShadow: isActive ? `0 0 10px ${themeColor}88` : 'none' }}>
             <Icon size={14} /> {t.label}
           </button>
         );})}
@@ -302,18 +319,18 @@ const DashboardPreview = () => {
 
       {/* ═══ CONTENT ═══ */}
       <main style={S.main}>
-        {tab === 0 && <OperationsTab detections={detections} nodes={nodes} />}
-        {tab === 1 && <NodeNetworkTab nodes={nodes} />}
-        {tab === 2 && <AnalyticsTab />}
-        {tab === 3 && <AboutTab />}
+        {tab === 0 && <OperationsTab detections={detections} nodes={nodes} themeColor={themeColor} isAlertState={isAlertState} alertingNodes={alertingNodes} />}
+        {tab === 1 && <NodeNetworkTab nodes={nodes} themeColor={themeColor} isAlertState={isAlertState} alertingNodes={alertingNodes} />}
+        {tab === 2 && <AnalyticsTab themeColor={themeColor} isAlertState={isAlertState} />}
+        {tab === 3 && <AboutTab themeColor={themeColor} isAlertState={isAlertState} />}
       </main>
 
       {/* ═══ FOOTER ═══ */}
-      <footer style={S.footer}>
+      <footer style={{ ...S.footer, borderTopColor: isAlertState ? '#4a0a0a' : '#0d2016' }}>
         <div style={S.marquee}>
-          <span style={S.marqueeInner}>
-            ◈ ARANYADHWANI v1.0 &nbsp;·&nbsp; PROTECTING NAGARHOLE TIGER RESERVE &nbsp;·&nbsp; 4 NODES ACTIVE &nbsp;·&nbsp; 847 THREATS LOGGED &nbsp;·&nbsp; SYSTEM NOMINAL &nbsp;·&nbsp; NEXT MAINTENANCE: NODE_05 &nbsp;·&nbsp; UPLINK STABLE &nbsp;·&nbsp;
-            ◈ ARANYADHWANI v1.0 &nbsp;·&nbsp; PROTECTING NAGARHOLE TIGER RESERVE &nbsp;·&nbsp; 4 NODES ACTIVE &nbsp;·&nbsp; 847 THREATS LOGGED &nbsp;·&nbsp; SYSTEM NOMINAL &nbsp;·&nbsp; NEXT MAINTENANCE: NODE_05 &nbsp;·&nbsp; UPLINK STABLE &nbsp;·&nbsp;
+          <span style={{ ...S.marqueeInner, color: themeColor, textShadow: `0 0 6px ${themeColor}44` }}>
+            ◈ ARANYADHWANI v1.0 &nbsp;·&nbsp; PROTECTING NAGARHOLE TIGER RESERVE &nbsp;·&nbsp; 4 NODES ACTIVE &nbsp;·&nbsp; {detections.length} THREATS LOGGED &nbsp;·&nbsp; {isAlertState ? '⚠ HIGH ALERT ⚠' : 'SYSTEM NOMINAL'} &nbsp;·&nbsp; NEXT MAINTENANCE: NODE_05 &nbsp;·&nbsp; UPLINK STABLE &nbsp;·&nbsp;
+            ◈ ARANYADHWANI v1.0 &nbsp;·&nbsp; PROTECTING NAGARHOLE TIGER RESERVE &nbsp;·&nbsp; 4 NODES ACTIVE &nbsp;·&nbsp; {detections.length} THREATS LOGGED &nbsp;·&nbsp; {isAlertState ? '⚠ HIGH ALERT ⚠' : 'SYSTEM NOMINAL'} &nbsp;·&nbsp; NEXT MAINTENANCE: NODE_05 &nbsp;·&nbsp; UPLINK STABLE &nbsp;·&nbsp;
           </span>
         </div>
       </footer>
@@ -324,7 +341,7 @@ const DashboardPreview = () => {
 /* ═══════════════════════════════════════════════════════════════
    TAB 1: OPERATIONS
    ═══════════════════════════════════════════════════════════════ */
-const OperationsTab = ({ detections, nodes }) => (
+const OperationsTab = ({ detections, nodes, themeColor, isAlertState, alertingNodes }) => (
   <div style={{ animation: 'fadeSlideIn 0.4s ease-out' }}>
     {/* Alert Banner */}
     {detections.length > 0 && detections[0].severity === 'CRITICAL' && (
@@ -365,7 +382,7 @@ const OperationsTab = ({ detections, nodes }) => (
     <div style={S.opsGrid}>
       {/* Feed */}
       <div style={S.card}>
-        <div style={S.cardHead}><Shield size={14} color="#00ff41"/> LIVE THREAT FEED</div>
+        <div style={S.cardHead}><Shield size={14} color={themeColor}/> LIVE THREAT FEED</div>
         <div style={S.feedList}>
           {detections.length === 0 && <div style={{ color: '#5a9a6e', padding: 20, textAlign: 'center', fontFamily: "'Share Tech Mono'" }}>Listening to the forest... No recent threats.</div>}
           {detections.map((d) => {
@@ -398,27 +415,29 @@ const OperationsTab = ({ detections, nodes }) => (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Tactical Map */}
         <div style={{ ...S.card, flex: 1, display: 'flex', flexDirection: 'column', minHeight: 400 }}>
-          <div style={S.cardHead}><Globe size={14} color="#00ff41"/> LIVE TACTICAL MAP</div>
+          <div style={S.cardHead}><Globe size={14} color={themeColor}/> LIVE TACTICAL MAP</div>
           <div style={{ flex: 1, minHeight: 0, borderRadius: 6, overflow: 'hidden', border: '1px solid #0d2016', position: 'relative' }}>
             <MapContainer center={[12.035, 76.135]} zoom={11} style={{ height: '100%', width: '100%', background: '#020b04', zIndex: 1 }} zoomControl={false}>
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
               />
               
               {/* Sensor Nodes */}
               {nodes.map(n => {
                 const isActive = n.status === 'ACTIVE';
-                const nodeColor = isActive ? '#00ff41' : '#ff2020';
-                const anim = isActive ? 'animation: livePulse 2s infinite' : '';
+                const isAlerting = alertingNodes.has(n.id);
+                const nodeColor = isAlerting ? '#ff2020' : (isActive ? '#00A859' : '#ffaa00');
+                const anim = isAlerting ? 'animation: criticalPulse 1s infinite' : (isActive ? 'animation: livePulse 2s infinite' : '');
+                const glow = isAlerting ? `box-shadow: 0 0 15px #ff2020;` : `box-shadow: 0 0 8px ${nodeColor};`;
                 return (
                   <Marker key={n.id} position={[n.lat, n.lng]} icon={L.divIcon({
                     className: 'clear-marker',
-                    html: `<div style="width: 14px; height: 14px; background: ${nodeColor}33; border: 2px solid ${nodeColor}; border-radius: 50%; box-shadow: 0 0 8px ${nodeColor}; ${anim}"></div>`,
+                    html: `<div style="width: 14px; height: 14px; background: ${nodeColor}88; border: 2px solid ${nodeColor}; border-radius: 50%; ${glow} ${anim}"></div>`,
                     iconSize: [14,14], iconAnchor: [7,7], popupAnchor: [0, -7]
                   })}>
                     <Popup className="tactical-popup auth-border" style={{ borderColor: nodeColor }}>
-                      <div style={{ fontFamily: "'Share Tech Mono'", fontSize: '0.85rem', color: nodeColor, fontWeight: 700 }}>{n.id} <span style={{fontSize:'0.65rem', marginLeft:4}}>({n.status})</span></div>
+                      <div style={{ fontFamily: "'Share Tech Mono'", fontSize: '0.85rem', color: nodeColor, fontWeight: 700 }}>{n.id} <span style={{fontSize:'0.65rem', marginLeft:4}}>({isAlerting ? 'ALERT' : n.status})</span></div>
                       <div style={{ fontSize: '0.7rem', color: '#6aaa7e', marginTop: 4 }}>{n.sector}</div>
                       <div style={{ fontSize: '0.75rem', color: '#d4ffd4', marginTop: 4 }}>Battery: {n.battery}%</div>
                       <div style={{ fontSize: '0.7rem', color: '#6aaa7e', marginTop: 2 }}>Last Alert: {n.lastDetection}</div>
@@ -448,13 +467,13 @@ const OperationsTab = ({ detections, nodes }) => (
               })}
             </MapContainer>
             {/* Map Overlay Vignette */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 40px rgba(2,11,4,0.8)', zIndex: 2 }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', boxShadow: 'none', zIndex: 2 }} />
           </div>
         </div>
 
         {/* 24h Chart */}
         <div style={{ ...S.card, height: 240, display: 'flex', flexDirection: 'column' }}>
-          <div style={S.cardHead}><Activity size={14} color="#00ff41"/> 24-HOUR ACTIVITY</div>
+          <div style={S.cardHead}><Activity size={14} color={themeColor}/> 24-HOUR ACTIVITY</div>
           <div style={{ flex: 1, minHeight: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={HOURLY_DATA} margin={{ top: 10, right: 10, left: -25, bottom: -10 }}>
@@ -481,12 +500,12 @@ const OperationsTab = ({ detections, nodes }) => (
 /* ═══════════════════════════════════════════════════════════════
    TAB 2: NODE NETWORK
    ═══════════════════════════════════════════════════════════════ */
-const NodeNetworkTab = ({ nodes }) => (
+const NodeNetworkTab = ({ nodes, themeColor, isAlertState, alertingNodes }) => (
   <div style={{ animation: 'fadeSlideIn 0.4s ease-out' }}>
     {/* Summary Stats */}
     <div style={{ ...S.statsRow, marginBottom: 20 }}>
       {[
-        { label: 'NETWORK HEALTH', value: `${((nodes.filter(n => n.status === 'ACTIVE').length / nodes.length) * 100).toFixed(0)}%`, color: '#00ff41', icon: Heart },
+        { label: 'NETWORK HEALTH', value: `${((nodes.filter(n => n.status === 'ACTIVE').length / nodes.length) * 100).toFixed(0)}%`, color: themeColor, icon: Heart },
         { label: 'COVERAGE AREA', value: '12.4 km²', color: '#00aaff', icon: Globe },
         { label: 'NEED MAINTENANCE', value: nodes.filter(n => n.status === 'OFFLINE').length, color: '#ff2020', icon: AlertTriangle },
       ].map((s, i) => (
@@ -504,13 +523,15 @@ const NodeNetworkTab = ({ nodes }) => (
     <div style={S.nodeGrid}>
       {nodes.map(n => {
         const isOffline = n.status === 'OFFLINE';
-        const battColor = n.battery > 50 ? '#00ff41' : n.battery > 20 ? '#ffaa00' : '#ff2020';
+        const isAlerting = alertingNodes.has(n.id);
+        const nodeColor = isAlerting ? '#ff2020' : '#00ff41';
+        const battColor = n.battery > 50 ? nodeColor : n.battery > 20 ? '#ffaa00' : '#ff2020';
         return (
-          <div key={n.id} style={{ ...S.nodeCard, opacity: isOffline ? 0.5 : 1, borderColor: isOffline ? '#ff202033' : '#0d2016' }} className="hoverCard">
+          <div key={n.id} style={{ ...S.nodeCard, opacity: isOffline ? 0.5 : 1, borderColor: isAlerting ? '#ff2020' : (isOffline ? '#ff202033' : '#0d2016'), animation: isAlerting ? 'criticalPulse 1.5s infinite' : 'none' }} className="hoverCard">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <span style={S.nodeId}>{n.id}</span>
-              <span style={{ ...S.nodeStatus, color: isOffline ? '#ff2020' : '#00ff41' }}>
-                {isOffline ? <XCircle size={12}/> : <span style={S.greenPulse}/>} {n.status}
+              <span style={{ ...S.nodeId, color: nodeColor }}>{n.id}</span>
+              <span style={{ ...S.nodeStatus, color: isOffline ? '#ff2020' : nodeColor }}>
+                {isOffline ? <XCircle size={12}/> : (isAlerting ? <AlertTriangle size={12}/> : <span style={{ ...S.greenPulse, background: nodeColor }}/>)} {isAlerting ? 'ALERT' : n.status}
               </span>
             </div>
             <div style={S.nodeDetail}><MapPin size={11}/> {n.sector}</div>
@@ -546,7 +567,7 @@ const NodeNetworkTab = ({ nodes }) => (
 /* ═══════════════════════════════════════════════════════════════
    TAB 3: ANALYTICS
    ═══════════════════════════════════════════════════════════════ */
-const AnalyticsTab = () => (
+const AnalyticsTab = ({ themeColor, isAlertState }) => (
   <div style={{ animation: 'fadeSlideIn 0.4s ease-out' }}>
     {/* Insight Cards */}
     <div style={{ ...S.statsRow, marginBottom: 20 }}>
@@ -569,7 +590,7 @@ const AnalyticsTab = () => (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
       {/* Hourly Heatmap */}
       <div style={S.card}>
-        <div style={S.cardHead}><Activity size={14} color="#00ff41"/> DETECTION HEATMAP BY HOUR</div>
+        <div style={S.cardHead}><Activity size={14} color={themeColor}/> DETECTION HEATMAP BY HOUR</div>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={HOURLY_DATA} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#0d2016" />
@@ -585,7 +606,7 @@ const AnalyticsTab = () => (
 
       {/* Weekly */}
       <div style={S.card}>
-        <div style={S.cardHead}><Activity size={14} color="#00ff41"/> WEEKLY DETECTION TREND</div>
+        <div style={S.cardHead}><Activity size={14} color={themeColor}/> WEEKLY DETECTION TREND</div>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={WEEKLY_TREND} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#0d2016" />
@@ -599,7 +620,7 @@ const AnalyticsTab = () => (
 
       {/* Confidence Distribution */}
       <div style={S.card}>
-        <div style={S.cardHead}><BarChart3 size={14} color="#00ff41"/> CONFIDENCE DISTRIBUTION</div>
+        <div style={S.cardHead}><BarChart3 size={14} color={themeColor}/> CONFIDENCE DISTRIBUTION</div>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={CONF_DIST} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#0d2016" />
@@ -619,7 +640,7 @@ const AnalyticsTab = () => (
 
       {/* Threat Classes Pie */}
       <div style={S.card}>
-        <div style={S.cardHead}><Crosshair size={14} color="#00ff41"/> TOP THREAT CLASSES</div>
+        <div style={S.cardHead}><Crosshair size={14} color={themeColor}/> TOP THREAT CLASSES</div>
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
             <Pie data={THREAT_CLASSES} cx="50%" cy="50%" innerRadius={55} outerRadius={80}
@@ -644,13 +665,13 @@ const AnalyticsTab = () => (
 /* ═══════════════════════════════════════════════════════════════
    TAB 4: ABOUT / SYSTEM
    ═══════════════════════════════════════════════════════════════ */
-const AboutTab = () => (
+const AboutTab = ({ themeColor, isAlertState }) => (
   <div style={{ animation: 'fadeSlideIn 0.4s ease-out' }}>
     {/* Hero */}
     <div style={S.aboutHero}>
-      <TreePine size={40} color="#00ff41" style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,65,0.5))' }} />
+      <TreePine size={40} color={themeColor} style={{ filter: `drop-shadow(0 0 12px ${themeColor}88)` }} />
       <div>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '2rem', fontWeight: 700, color: '#00ff41', letterSpacing: 2 }}>ARANYADHWANI</div>
+        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '2rem', fontWeight: 700, color: themeColor, letterSpacing: 2 }}>ARANYADHWANI</div>
         <div style={{ color: '#6aaa7e', fontSize: '0.9rem', fontStyle: 'italic', marginTop: 2 }}>"Aranya" (अरण्य) = Forest &nbsp;·&nbsp; "Dhwani" (ध्वनि) = Sound</div>
         <div style={{ color: '#d4ffd4', fontSize: '0.88rem', marginTop: 8, maxWidth: 600, lineHeight: 1.7 }}>
           An AI-powered acoustic surveillance system that turns every tree into a sentinel. Deployed across Nagarhole Tiger Reserve, it listens to the forest 24/7, detecting gunshots in real time and alerting rangers within seconds — giving wildlife a fighting chance against poaching.
@@ -660,12 +681,12 @@ const AboutTab = () => (
 
     {/* Architecture */}
     <div style={{ ...S.card, marginTop: 16 }}>
-      <div style={S.cardHead}><Layers size={14} color="#00ff41"/> TECHNICAL ARCHITECTURE</div>
+      <div style={S.cardHead}><Layers size={14} color={themeColor}/> TECHNICAL ARCHITECTURE</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginTop: 8 }}>
         {ARCH_LAYERS.map((l, i) => (
           <div key={i} style={S.archCard} className="hoverCard">
-            <l.icon size={22} color="#00ff41" style={{ marginBottom: 8 }} />
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '0.85rem', fontWeight: 700, color: '#00ff41', letterSpacing: 1 }}>{l.name}</div>
+            <l.icon size={22} color={themeColor} style={{ marginBottom: 8 }} />
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '0.85rem', fontWeight: 700, color: themeColor, letterSpacing: 1 }}>{l.name}</div>
             <div style={{ color: '#d4ffd4', fontSize: '0.82rem', marginTop: 4 }}>{l.desc}</div>
             <div style={{ color: '#6aaa7e', fontSize: '0.75rem', marginTop: 6, lineHeight: 1.5 }}>{l.detail}</div>
           </div>
@@ -676,7 +697,7 @@ const AboutTab = () => (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}>
       {/* Hardware */}
       <div style={S.card}>
-        <div style={S.cardHead}><Cpu size={14} color="#00ff41"/> HARDWARE SPECS</div>
+        <div style={S.cardHead}><Cpu size={14} color={themeColor}/> HARDWARE SPECS</div>
         <table style={S.table}>
           <tbody>
             {[
@@ -699,19 +720,19 @@ const AboutTab = () => (
 
       {/* Cost */}
       <div style={S.card}>
-        <div style={S.cardHead}><Zap size={14} color="#00ff41"/> DEPLOYMENT COST</div>
+        <div style={S.cardHead}><Zap size={14} color={themeColor}/> DEPLOYMENT COST</div>
         <table style={S.table}>
           <tbody>
             {COST_DATA.map((c, i) => (
               <tr key={i} style={S.tableRow}>
                 <td style={S.tableKey}>{c.item}</td>
-                <td style={{ ...S.tableVal, color: '#00ff41', fontFamily: "'Share Tech Mono', monospace", fontWeight: 700 }}>{c.cost}</td>
+                <td style={{ ...S.tableVal, color: themeColor, fontFamily: "'Share Tech Mono', monospace", fontWeight: 700 }}>{c.cost}</td>
               </tr>
             ))}
           </tbody>
         </table>
         <div style={{ marginTop: 16, textAlign: 'center' }}>
-          <span style={{ background: '#00ff4115', border: '1px solid #00ff4133', borderRadius: 20, padding: '6px 18px', fontSize: '0.72rem', color: '#00ff41', fontWeight: 700, letterSpacing: 1 }}>
+          <span style={{ background: `${themeColor}15`, border: `1px solid ${themeColor}33`, borderRadius: 20, padding: '6px 18px', fontSize: '0.72rem', color: themeColor, fontWeight: 700, letterSpacing: 1 }}>
             <Award size={12} style={{ verticalAlign: -2, marginRight: 6 }}/> BUILT FOR HACKATHON
           </span>
         </div>
@@ -720,7 +741,7 @@ const AboutTab = () => (
 
     {/* Team */}
     <div style={{ ...S.card, marginTop: 16 }}>
-      <div style={S.cardHead}><Users size={14} color="#00ff41"/> TEAM ARANYADHWANI</div>
+      <div style={S.cardHead}><Users size={14} color={themeColor}/> TEAM ARANYADHWANI</div>
       <div style={{ color: '#d4ffd4', fontSize: '0.85rem', lineHeight: 1.8, marginTop: 4 }}>
         A passionate team of engineers, conservationists, and AI researchers dedicated to protecting India's forests through technology. Built with ❤️ for wildlife.
       </div>
